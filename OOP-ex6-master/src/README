@@ -1,0 +1,91 @@
+jake.korman
+fidaa_naffaa
+
+
+================
+Description: ===
+================
+There are three main packages in this project:
+1. The main package that contains the sJavac class. This class receives the file input and creates the scanner
+that supplies the lines to be checked. It has the run program method that runs the syntax checking part of the
+program and the logic checking part.
+2. The syntax package. This contains the SyntaxChecker class which carries out the syntax checking functions
+of this program. Also contains various pattern and matcher factories for different types of syntax and lines
+in files.
+3. The logic package. Contains all the files pertaining to the general logic of the program. This is divided into
+subpackages, variables, checkers, blocks, and accessories which split the work on breaking down the program logic.
+Once all the lines are checked one by one in the syntax package, the sJavac class concatenates all the lines into one
+large line and feeds it into the LogicRunner class. This class then delegates all the tasks to different classes
+like the Capture Blocks class which divides up the file into blocks, and then each of those blocks are taken
+by the Logic runner and sent to be analyzed by the variable splitter class among others that break down each block.
+
+
+==================================
+Design Questions and Explanations:
+==================================
+1. The way we built our excpetion mechanism was by printing errors using system.err to print out a specific
+error warning on the type of logic or syntax error, and then we threw an exception. All the IO errors are
+handled in the Sjavac main function, and all the errors within the file itself extend a superclass called
+Type1Exception. For syntax errors, we have the IllegalSyntaxException that is thrown that inherits from Type1Exception
+and for logic errors we have LogicProblemExcpetion that is thrown that also inherits from Type1Exception. Each
+of these excpetions are in their respective packages. This design allows for us to used polymorphism to
+print out 1 at the end of a program for both syntax errors and logic errors.
+
+2. In our design, we decided to split up the syntax and logic checking mechanisms. We intitially thought we would
+want to check both at the same time, but we realized it would be more modular to separate them, and allow
+the logic part of the program to be able to assume that it is working with lines that are perfect. This
+simplifies the task for the logic runner, which only must check line order and variable usage and method usage,
+something that has nothing to do with syntax.
+-A decision we had to make was whether the syntaxchecker of the program would return the identification of each
+line in the form of an enum and supply that information to the logic runner, but we decided against this, because
+we wanted to make the logic section as independent as possible, only dependent on the receiving the file
+that it knows is syntactically perfect.
+-Another integral part of our design was that we made pattern and matcher factories. We did this so that
+we would never have to create a potentially infinite amount of patterns and matchers and so we wouldnt
+have to use the inefficient string methods such as .matches or .replaceFirst which compile a pattern
+and matcher every single time. This design decision makes our program way more efficient, with only
+at most about 50 patterns and matchers created, no matter how massively huge files our program
+receives.
+- In order to add lots of method types, we would have created a methodRegexBuilder function just like we
+created for the variable line regexes, and it would receive a type parameter which would be general
+based on the type of the method. Then we would create corresponding patterns and matchers in the
+lineMatcher factory for each type. We would also need to adjust the if and while statements
+to be able to receive boolean methods as conditions. We may also need to create the ability to
+overload methods because you could have two methods with the same name but a different return type
+which are fundamentally different methods, and we would need to store this information of method type
+along with the method name when we compare methods across the file in the logic section.
+-In order to check for classes, we would need to check for proper class syntax and constructors, as
+well as for public, private and other modifiers and abstract, extends, implements and other keywords.
+We would also need to check for methods being within the classes in the right place, and for fields that
+are declared or initialized above the constructor. We would also need to check for constructor overloading
+as well. Basically, we would probably create a class section of our project that utilizes the
+basic syntax and logic checkers that we use for their smaller parts, like methods and fields, and
+apply them to the classes.
+
+3. There are two regexes that are central to the code, among others:
+
+A)  METHOD_SIGNATURE enum that checks all method signatures. It is a huge regex expression that is divided up into
+reusable parts that are used for multiple other regexes. It starts off by checking that the word void appears
+before it like all sJava method signatures, and then it is broken up into parts:
+-METHOD_NAME regex which checks for correct method names which is also reused for the method calls regex.
+-FINAL_MODIFIER regex which checks for a final modifier within one of its parameters.
+-METHOD_PARAM_NAME regex which is used for checking all the method parameters for their declarations and names.
+This in turn is made of the VAR_OPTIONS regex which includes all the variable type options in the program and the
+VAR_NAME regex which checks for all the valid names for variables. VAR_NAME is also used for checking general
+variable names as well. There is also a mechanism for checking for commas inside the parameters section
+of the signature, which uses a lookbehind mechanism to make sure a variable was declared beforehand
+in order to be a correct method signature.
+
+B) We made a function called variableRegexBuilder which receives a couple sub-regex parameters and builds the
+general structure of all the variable line checking regexes in the program. For example, the enum
+BOOL_VAR_LINE calls the variableRegexBuilder function with the BOOLEAN regex which is the name of the
+variable and spaces around it, and the BOOL_EQUALS regex which is broken up into parts as well.
+The variableRegexBuilder starts off by placing a final modifier that uses a lookahead mechanism
+to make sure there is an equals sign associated with it, and then comes the variable type parameter
+and all the spaces around it. Afterward there is the VAR_NAME regex which is inserted
+(described above) which checks for correct variable names, then the general equals parameter.
+Then comes the possibility of many variables being declared at once with a comma right before it, and
+uses a similar lookbehind mechanism to make sure something else was originally declared before it.
+This regex also checks for whether variables have been intialized as well. It is a huge regex that
+is broken up into smaller parts for reuse and to make it easier to debug, part by part.
+

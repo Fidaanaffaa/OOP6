@@ -1,0 +1,21 @@
+int check = 5;
+boolean h = true;
+void foo(){
+int a,b;
+    while(a){
+        if (b >= a){
+            if (a == b ) {
+    return;
+        }
+    }
+    return;
+        }
+        return;
+}
+
+void moo(int a){
+    int c = 3,d;
+    if(c == 3){
+        return;
+    }
+}

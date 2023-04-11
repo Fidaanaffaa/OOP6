@@ -1,0 +1,15 @@
+The CheckList :
+1) Checking that global variables do not have the same name.*
+2) Checking that local variables do not have the same name, inside the same block, unless nested within another block.*
+3) Final variables must be initialized at the declaration time using a constant, and must not be assigned
+again.
+4) All variables, local or global, cannot be used before being assigned a value, they may be initialized
+before in a line and immediately assigned a value in the next line.*
+5) Variables can be assigned using another variable given they are of the same type, but a double can be assigned
+an int, and a boolean can be assigned to both an int and a double.
+6) A global variable may be accessed by a method that comes before its assignment.
+7) In the case of an unassigned global variable, all methods may access it, but none may use it until they assign it
+themselves.
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
